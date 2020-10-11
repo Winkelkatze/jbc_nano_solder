@@ -1,0 +1,5 @@
+FILES += main eeprom_i2c font_compressed
+
+vpath %.c source
+
+OBJS += $(addsuffix .o,$(FILES))
