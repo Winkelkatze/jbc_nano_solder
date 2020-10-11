@@ -1,0 +1,25 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,5.1.6*%
+%TF.CreationDate,2020-09-04T20:47:42+02:00*%
+%TF.ProjectId,JBC_Nano_Hardware,4a42435f-4e61-46e6-9f5f-486172647761,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Paste,Bot*%
+%TF.FilePolarity,Positive*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 5.1.6) date 2020-09-04 20:47:42*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%ADD10R,0.900000X1.700000*%
+G04 APERTURE END LIST*
+D10*
+%TO.C,SW2*%
+X31926000Y-51562000D03*
+X28526000Y-51562000D03*
+%TD*%
+%TO.C,SW3*%
+X31926000Y-48006000D03*
+X28526000Y-48006000D03*
+%TD*%
+M02*

@@ -1,0 +1,51 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>KiCad BOM Example 5</title>
+    </head>
+    <body>
+    <h1>/home/daniel/projects/jbc_nano/JBC_Nano_Hardware/JBC_Nano_Hardware.sch</h1>
+    <p>Fri 04 Sep 2020 11:49:58 AM CEST</p>
+    <p>Eeschema 5.1.6</p>
+    <p><b>Component Count:</b>50</p>
+    <table>
+    <tr><th style='width:640px'>Ref</th><th>Qnty</th><th>Value</th><th>Part</th><th>Footprint</th><th>Description</th><th>Vendor</th></tr>
+    <tr><td>C1, C4, C8, C12, C15, C17</td><td>6</td><td>100n</td><td>Device:C</td><td>Capacitor_SMD:C_0603_1608Metric</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>C2, C10, C16</td><td>3</td><td>10n</td><td>Device:C</td><td>Capacitor_SMD:C_0603_1608Metric</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>C3, C6</td><td>2</td><td>12p</td><td>Device:C</td><td>Capacitor_SMD:C_0603_1608Metric</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>C5, C7, C14</td><td>3</td><td>1u</td><td>Device:C</td><td>Capacitor_SMD:C_0603_1608Metric</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>C9</td><td>1</td><td>1000u</td><td>Device:CP</td><td>Capacitor_THT:CP_Radial_D10.0mm_P3.50mm</td><td>Polarized capacitor</td><td></td></tr>
+    <tr><td>C11</td><td>1</td><td>10u</td><td>Device:C</td><td>Capacitor_SMD:C_0603_1608Metric</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>C13</td><td>1</td><td>C</td><td>Device:C</td><td>Capacitor_SMD:C_0603_1608Metric</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>D1</td><td>1</td><td>D_Schottky</td><td>Device:D_Schottky</td><td>Diode_SMD:D_0603_1608Metric</td><td>Schottky diode</td><td></td></tr>
+    <tr><td>D2</td><td>1</td><td>LED</td><td>Device:LED</td><td>LED_SMD:LED_0603_1608Metric_Castellated</td><td>Light emitting diode</td><td></td></tr>
+    <tr><td>F1</td><td>1</td><td>Fuse</td><td>Device:Fuse</td><td>Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open</td><td>Fuse</td><td></td></tr>
+    <tr><td>J1</td><td>1</td><td>POWER_IN</td><td>Connector:Screw_Terminal_01x02</td><td>TerminalBlock:TerminalBlock_bornier-2_P5.08mm</td><td>Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</td><td></td></tr>
+    <tr><td>J2</td><td>1</td><td>IRON</td><td>Connector:Screw_Terminal_01x04</td><td>TerminalBlock:TerminalBlock_bornier-4_P5.08mm</td><td>Generic screw terminal, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</td><td></td></tr>
+    <tr><td>J3</td><td>1</td><td>PROG</td><td>Connector:Conn_01x04_Male</td><td>Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical</td><td>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</td><td></td></tr>
+    <tr><td>J4</td><td>1</td><td>UART</td><td>Connector:Conn_01x03_Male</td><td>Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical</td><td>Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)</td><td></td></tr>
+    <tr><td>J5</td><td>1</td><td>Display128x32</td><td>Connector:Conn_01x04_Female</td><td>Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical</td><td>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</td><td></td></tr>
+    <tr><td>JP1</td><td>1</td><td>NO_VGATE_REG</td><td>Device:Jumper_NO_Small</td><td>Jumper:SolderJumper-2_P1.3mm_Open_TrianglePad1.0x1.5mm</td><td>Jumper, normally open, small symbol</td><td></td></tr>
+    <tr><td>JP2</td><td>1</td><td>NO_GATE_DRV</td><td>Device:Jumper_NO_Small</td><td>Jumper:SolderJumper-2_P1.3mm_Open_TrianglePad1.0x1.5mm</td><td>Jumper, normally open, small symbol</td><td></td></tr>
+    <tr><td>L1</td><td>1</td><td>L</td><td>Device:L</td><td>Inductor_SMD:L_0805_2012Metric</td><td>Inductor</td><td></td></tr>
+    <tr><td>Q1</td><td>1</td><td>IRF8721PBF-1</td><td>Transistor_FET:IRF8721PBF-1</td><td>Package_SO:SOIC-8_3.9x4.9mm_P1.27mm</td><td>14A Id, 30V Vds, HEXFET N-Channel MOSFET, SO-8</td><td></td></tr>
+    <tr><td>R1, R3, R4, R8</td><td>4</td><td>1K</td><td>Device:R</td><td>Resistor_SMD:R_0603_1608Metric</td><td>Resistor</td><td></td></tr>
+    <tr><td>R2, R5, R7, R9, R10</td><td>5</td><td>10K</td><td>Device:R</td><td>Resistor_SMD:R_0603_1608Metric</td><td>Resistor</td><td></td></tr>
+    <tr><td>R6</td><td>1</td><td>10R</td><td>Device:R</td><td>Resistor_SMD:R_0603_1608Metric</td><td>Resistor</td><td></td></tr>
+    <tr><td>SW1</td><td>1</td><td>Rotary_Encoder_Switch</td><td>Device:Rotary_Encoder_Switch</td><td>Rotary_Encoder:RotaryEncoder_Alps_EC12E-Switch_Vertical_H20mm</td><td>Rotary encoder, dual channel, incremental quadrate outputs, with switch</td><td></td></tr>
+    <tr><td>SW2</td><td>1</td><td>RESET</td><td>Switch:SW_Push</td><td>Button_Switch_SMD:SW_SPST_B3U-1000P</td><td>Push button switch, generic, two pins</td><td></td></tr>
+    <tr><td>SW3</td><td>1</td><td>BOOT</td><td>Switch:SW_Push</td><td>Button_Switch_SMD:SW_SPST_B3U-1000P</td><td>Push button switch, generic, two pins</td><td></td></tr>
+    <tr><td>U1</td><td>1</td><td>STM32F030F4Px</td><td>MCU_ST_STM32F0:STM32F030F4Px</td><td>Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm</td><td>ARM Cortex-M0 MCU, 16KB flash, 4KB RAM, 48MHz, 2.4-3.6V, 15 GPIO, TSSOP-20</td><td></td></tr>
+    <tr><td>U2</td><td>1</td><td>AP1117-33</td><td>Regulator_Linear:AP1117-33</td><td>Package_TO_SOT_SMD:SOT-223-3_TabPin2</td><td>1A Low Dropout regulator, positive, 3.3V fixed output, SOT-223</td><td></td></tr>
+    <tr><td>U3</td><td>1</td><td>NCP1117-12_SOT223</td><td>Regulator_Linear:NCP1117-12_SOT223</td><td>Package_TO_SOT_SMD:SOT-23</td><td>1A Low drop-out regulator, Fixed Output 12V, SOT-223</td><td></td></tr>
+    <tr><td>U4</td><td>1</td><td>AD8615</td><td>Amplifier_Operational:AD8603</td><td>Package_TO_SOT_SMD:TSOT-23-5</td><td>Precision Micropower, Low Noise CMOS, Rail-to-Rail Input/Output Operational Amplifier, TSOT-23-5</td><td></td></tr>
+    <tr><td>U5</td><td>1</td><td>IRS44273</td><td>custom_parts:IRS44273</td><td>Package_TO_SOT_SMD:TSOT-23-5</td><td></td><td></td></tr>
+    <tr><td>U6</td><td>1</td><td>AT24CS01-STUM</td><td>Memory_EEPROM:AT24CS01-STUM</td><td>Package_TO_SOT_SMD:SOT-23-5</td><td>I2C Serial EEPROM, 1Kb (128x8) with Unique Serial Number, SOT-23-5</td><td></td></tr>
+    <tr><td>Y1</td><td>1</td><td>Crystal_GND24</td><td>Device:Crystal_GND24</td><td>Crystal:Crystal_SMD_EuroQuartz_MJ-4Pin_5.0x3.2mm</td><td>Four pin crystal, GND on pins 2 and 4</td><td></td></tr><!--TABLEROW-->
+    </table>
+    </body>
+</html>
+    
