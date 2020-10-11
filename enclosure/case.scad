@@ -20,6 +20,13 @@ encoder_hole_r = 3.5;
 disp_cutout = [25.5, 9];
 disp_pos = [11 + 3 + encoder_pos[0], encoder_pos[1] - 0.8 - disp_cutout[1]/2];
 
+stand_nuts = [[63, 35], [73, 45]];
+stand_nuts_hole = 1.5;
+stand_nuts_extra_strength = 1;
+stand_nuts_socket_height = 2.5;
+stand_nuts_socket_size = 3.1;
+stand_nuts_socket_brim = 2;
+
 front_plate_width = 2;
 sides_width = 2;
 sides_height = 35;
@@ -30,13 +37,33 @@ pcb_size = [70.9, 71.6] - pcb_offset;
 // top, right, bottom, left
 pcb_spacing = [4, 30, 1, 1];
 
+connector_holes = [
+[10, 23, 7.5/2],
+[35, 23, 10/2]];
+
 bottom_overlap = 2.5;
 bottom_height = 1.5;
 bottom_overlap_width = 3;
 
-connector_holes = [
-[10, 23, 7.5/2],
-[35, 23, 10/2]];
+holder_mount_distance = stand_nuts[1] - stand_nuts[0];
+holder_base_size = 20;
+holder_base_height = 10;
+holder_base_wire = 0.3;
+holder_tower_r = 3.5;
+holder_tower_height = 70;
+holder_tower_hole = 1;
+holder_screw_offset = 2;
+holder_screw_head = 2.8;
+
+holder_arm_height = 6;
+holder_arm_length = 30;
+holder_arm_tower_overlap_r = 2;
+holder_arm_tower_overlap_h = 4;
+holder_arm_circle = 14;
+holder_arm_circle_inner = 10;
+holder_arm_hole = 8;
+holder_arm_wire = 0.5;
+
 
 outer_a = [
         -pcb_spacing[3] - sides_width,
@@ -146,6 +173,32 @@ module connector_holes()
     }
 }
 
+module stand_nuts_pos()
+{
+    for (s = stand_nuts)
+    {
+        translate([s[0], s[1], front_plate_width])
+        {
+            cylinder(h = stand_nuts_socket_height, r = stand_nuts_socket_size + stand_nuts_socket_brim + stand_nuts_extra_strength, $fn=6);
+        }
+    }
+}
+
+module stand_nuts_neg()
+{
+    for (s = stand_nuts)
+    {
+        translate([s[0], s[1], 0])
+        {
+            cylinder(h = front_plate_width + stand_nuts_extra_strength, r = stand_nuts_hole);
+        }
+        translate([s[0], s[1], front_plate_width + stand_nuts_extra_strength])
+        {
+            cylinder(h = stand_nuts_socket_height, r = stand_nuts_socket_size, $fn=6);
+        }
+    }
+}
+
 module base()
 {
     hull()
@@ -162,11 +215,17 @@ module front_plate()
 {
     difference()
     {
-        base();
+        union()
+        {
+            base();
+            stand_nuts_pos();
+        }
         display_cutout();
         encoder_hole();
+        stand_nuts_neg();
     }
-
+    
+    
     mountings();
     difference()
     {
@@ -202,7 +261,123 @@ module bottom_plate()
     }
 }
 
+module holder_tower()
+{
+    hull()
+    {
+        cube([holder_base_size, holder_base_size, 0.01]);
+        translate([holder_base_size / 2, holder_base_size / 2, holder_base_height])
+        {
+            cylinder(h=0.01, r=holder_tower_r);
+        }
+    }
+    translate([holder_base_size / 2, holder_base_size / 2, holder_base_height])
+    {
+        cylinder(h=holder_tower_height, r=holder_tower_r);
+    }
+}
+
+module holder_tower_neg()
+{
+    translate([holder_base_size / 2, holder_base_size / 2, 0])
+    {
+        cylinder(h=(holder_base_height + holder_tower_height), r=holder_tower_hole);
+        translate([-holder_mount_distance[0] / 2, -holder_mount_distance[1] / 2, 0])
+        {
+            cylinder(h=holder_screw_offset, r=stand_nuts_hole);
+            translate([0, 0, holder_screw_offset])
+            {
+                cylinder(h=holder_base_height, r=holder_screw_head);
+            }
+        }
+        translate([holder_mount_distance[0] / 2, holder_mount_distance[1] / 2, 0])
+        {
+            cylinder(h=holder_screw_offset, r=stand_nuts_hole);
+            translate([0, 0, holder_screw_offset])
+            {
+                cylinder(h=holder_base_height, r=holder_screw_head);
+            }
+            
+            k = stand_nuts_hole / sqrt(2);
+            translate([-k, -k, 0])
+            {
+                cylinder(h=holder_screw_offset, r=holder_base_wire);
+            }
+        }
+        rotate([0, 90, 45])
+        {
+            cylinder(h=norm(holder_mount_distance / 2), r=holder_base_wire);
+        }
+    }
+}
+
+module holder()
+{
+    difference()
+    {
+        holder_tower();
+        holder_tower_neg();
+    }
+}
+
+module holder_arm_pos()
+{
+    hull()
+    {
+        cylinder(h=holder_arm_height, r=(holder_arm_tower_overlap_r + holder_tower_r));
+        translate([holder_arm_length, 0, 0])
+        {
+            cylinder(h=holder_arm_height, r=holder_arm_circle);
+        }
+    }
+}
+
+module holder_arm_neg()
+{
+    cylinder(h=holder_arm_tower_overlap_h, r=holder_tower_r);
+    translate([holder_arm_length, 0, 0])
+    {
+        hull()
+        {
+            cylinder(h=holder_arm_height, r=holder_arm_hole);
+            translate([holder_arm_length, 0, 0])
+            {
+                cylinder(h=holder_arm_height, r=holder_arm_hole);
+            }
+        }
+    }
+    translate([holder_arm_length, 0, holder_arm_height / 2])
+    {
+        cylinder(h=holder_arm_height / 2, r=holder_arm_circle_inner);
+    }
+    
+    translate([0, 0, holder_arm_tower_overlap_h])
+    {
+        rotate([0, 90, 0])
+        {
+            cylinder(h=holder_arm_length, r=holder_arm_wire);
+        }
+    }
+}
+
+module holder_arm()
+{
+    difference()
+    {
+        holder_arm_pos();
+        holder_arm_neg();
+    }
+}
+
 front_plate();
+
+translate([58, 30, 0])
+rotate([180, 0, 90])
+{
+    holder();
+    translate([holder_base_size / 2, holder_base_size / 2, holder_tower_height + holder_base_height - holder_arm_tower_overlap_h])
+    holder_arm();
+}
 
 //translate([0, 0, 40])
 //    bottom_plate();
