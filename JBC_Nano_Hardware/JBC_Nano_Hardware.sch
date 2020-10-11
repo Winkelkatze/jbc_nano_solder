@@ -96,8 +96,8 @@ $Comp
 L Device:R R3
 U 1 1 5F4B31B3
 P 5900 2850
-F 0 "R3" V 5693 2850 50  0000 C CNN
-F 1 "1K" V 5784 2850 50  0000 C CNN
+F 0 "R3" V 6000 2850 50  0000 C CNN
+F 1 "1K" V 5800 2850 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" V 5830 2850 50  0001 C CNN
 F 3 "~" H 5900 2850 50  0001 C CNN
 	1    5900 2850
@@ -115,39 +115,8 @@ Wire Wire Line
 	5150 2850 5750 2850
 Wire Wire Line
 	5150 2350 5150 2450
-Text Label 4650 2650 2    50   ~ 0
+Text Label 5450 2650 0    50   ~ 0
 HEATER_GATE
-$Comp
-L Transistor_FET:IRF8721PBF-1 Q1
-U 1 1 5F4CF755
-P 5050 2650
-F 0 "Q1" H 5254 2696 50  0000 L CNN
-F 1 "IRF8721PBF-1" H 5254 2605 50  0000 L CNN
-F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 5250 2550 50  0001 L CNN
-F 3 "http://www.irf.com/product-info/datasheets/data/irf8721pbf-1.pdf" H 5050 2650 50  0001 L CNN
-	1    5050 2650
-	1    0    0    -1  
-$EndComp
-Connection ~ 5150 2850
-$Comp
-L Device:R R1
-U 1 1 5F4D28D5
-P 4850 2800
-F 0 "R1" H 4920 2846 50  0000 L CNN
-F 1 "1K" H 4920 2755 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4780 2800 50  0001 C CNN
-F 3 "~" H 4850 2800 50  0001 C CNN
-	1    4850 2800
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4850 2950 5150 2950
-Connection ~ 5150 2950
-Wire Wire Line
-	5150 2950 5150 2850
-Wire Wire Line
-	4650 2650 4850 2650
-Connection ~ 4850 2650
 $Comp
 L Connector:Conn_01x04_Female J5
 U 1 1 5F4D8D8F
@@ -903,91 +872,44 @@ F 3 "" H 7100 2600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Connection ~ 7100 2600
-$Comp
-L Device:Jumper_NO_Small JP2
-U 1 1 5F598B5F
-P 7200 950
-F 0 "JP2" H 7200 1050 50  0000 C CNN
-F 1 "NO_GATE_DRV" H 7200 850 50  0000 C CNN
-F 2 "Jumper:SolderJumper-2_P1.3mm_Open_TrianglePad1.0x1.5mm" H 7200 950 50  0001 C CNN
-F 3 "~" H 7200 950 50  0001 C CNN
-	1    7200 950 
-	-1   0    0    1   
-$EndComp
 Text Label 6800 950  2    50   ~ 0
 HEATER_ON
 $Comp
 L power:GND #PWR012
 U 1 1 5F5B49C1
-P 6700 1700
-F 0 "#PWR012" H 6700 1450 50  0001 C CNN
-F 1 "GND" H 6705 1527 50  0000 C CNN
-F 2 "" H 6700 1700 50  0001 C CNN
-F 3 "" H 6700 1700 50  0001 C CNN
-	1    6700 1700
+P 6350 1700
+F 0 "#PWR012" H 6350 1450 50  0001 C CNN
+F 1 "GND" H 6355 1527 50  0000 C CNN
+F 2 "" H 6350 1700 50  0001 C CNN
+F 3 "" H 6350 1700 50  0001 C CNN
+	1    6350 1700
 	1    0    0    -1  
 $EndComp
-$Comp
-L Regulator_Linear:NCP1117-12_SOT223 U3
-U 1 1 5F5BE66E
-P 5350 1400
-F 0 "U3" H 5350 1642 50  0000 C CNN
-F 1 "NCP1117-12_SOT223" H 5350 1551 50  0000 C CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 5350 1600 50  0001 C CNN
-F 3 "http://www.onsemi.com/pub_link/Collateral/NCP1117-D.PDF" H 5450 1150 50  0001 C CNN
-	1    5350 1400
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5350 1700 5800 1700
 $Comp
 L Device:C C14
 U 1 1 5F5E7745
-P 5800 1550
-F 0 "C14" H 5915 1596 50  0000 L CNN
-F 1 "1u" H 5915 1505 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 5838 1400 50  0001 C CNN
-F 3 "~" H 5800 1550 50  0001 C CNN
-	1    5800 1550
-	1    0    0    -1  
-$EndComp
-Connection ~ 5800 1700
-Wire Wire Line
-	5800 1700 6700 1700
-Wire Wire Line
-	5650 1400 5800 1400
-Wire Wire Line
-	5800 1400 5800 1100
-Connection ~ 5800 1400
-$Comp
-L Device:Jumper_NO_Small JP1
-U 1 1 5F5C6E44
-P 5600 1100
-F 0 "JP1" H 5600 1285 50  0000 C CNN
-F 1 "NO_VGATE_REG" H 5600 1194 50  0000 C CNN
-F 2 "Jumper:SolderJumper-2_P1.3mm_Open_TrianglePad1.0x1.5mm" H 5600 1100 50  0001 C CNN
-F 3 "~" H 5600 1100 50  0001 C CNN
-	1    5600 1100
+P 6350 1550
+F 0 "C14" H 6465 1596 50  0000 L CNN
+F 1 "1u" H 6465 1505 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 6388 1400 50  0001 C CNN
+F 3 "~" H 6350 1550 50  0001 C CNN
+	1    6350 1550
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5800 1100 5700 1100
-Wire Wire Line
-	5500 1100 5050 1100
-Wire Wire Line
-	5050 1100 5050 1400
+	6350 1700 6700 1700
+Connection ~ 6350 1400
 $Comp
 L power:VDC #PWR010
 U 1 1 5F5F6587
-P 5050 1100
-F 0 "#PWR010" H 5050 1000 50  0001 C CNN
-F 1 "VDC" H 5065 1273 50  0000 C CNN
-F 2 "" H 5050 1100 50  0001 C CNN
-F 3 "" H 5050 1100 50  0001 C CNN
-	1    5050 1100
+P 6350 1400
+F 0 "#PWR010" H 6350 1300 50  0001 C CNN
+F 1 "VDC" H 6365 1573 50  0000 C CNN
+F 2 "" H 6350 1400 50  0001 C CNN
+F 3 "" H 6350 1400 50  0001 C CNN
+	1    6350 1400
 	1    0    0    -1  
 $EndComp
-Connection ~ 5050 1100
 Connection ~ 1950 1750
 $Comp
 L Device:C C4
@@ -1073,8 +995,6 @@ F 3 "~" H 4950 3550 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 Connection ~ 5150 3650
-Wire Wire Line
-	5150 3350 5150 2950
 Connection ~ 5650 3650
 Wire Wire Line
 	5650 3650 6050 3650
@@ -1224,19 +1144,11 @@ Connection ~ 6700 1700
 Wire Wire Line
 	6900 1600 6800 1600
 Wire Wire Line
-	6800 1600 6800 950 
-Wire Wire Line
-	6800 950  7100 950 
-Wire Wire Line
-	7300 950  7500 950 
-Wire Wire Line
-	7500 950  7500 1400
-Wire Wire Line
 	7500 1600 7500 1700
 Wire Wire Line
 	7500 1700 6700 1700
 Wire Wire Line
-	6900 1400 5800 1400
+	6900 1400 6350 1400
 $Comp
 L Connector:TestPoint TP2
 U 1 1 5F57D7C0
@@ -1248,9 +1160,23 @@ F 3 "~" H 7000 750 50  0001 C CNN
 	1    6800 750 
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	6800 950  6800 750 
-Connection ~ 6800 950 
-Text Label 7500 950  0    50   ~ 0
+Text Label 7500 1400 0    50   ~ 0
 HEATER_GATE
+Connection ~ 6350 1700
+Wire Wire Line
+	6800 750  6800 1600
+$Comp
+L Transistor_FET:FDS9435A Q1
+U 1 1 5F855FCD
+P 5250 2650
+F 0 "Q1" H 5455 2604 50  0000 L CNN
+F 1 "FDS9435A" H 5455 2695 50  0000 L CNN
+F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 5450 2575 50  0001 L CIN
+F 3 "https://www.onsemi.com/pub/Collateral/FDS9435A-D.PDF" V 5250 2650 50  0001 L CNN
+	1    5250 2650
+	-1   0    0    1   
+$EndComp
+Connection ~ 5150 2850
+Wire Wire Line
+	5150 2850 5150 3350
 $EndSCHEMATC
