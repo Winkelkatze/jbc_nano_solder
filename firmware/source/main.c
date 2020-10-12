@@ -106,10 +106,15 @@
 #define CFG_CTRL_PWM_PERIOD_MAX  100
 
 #define CFG_CTRL_WND_SIZE_MIN     0
-#define CFG_CTRL_WND_SIZE_MAX   100
+#define CFG_CTRL_WND_SIZE_MAX    30
 
-#define CFG_CTRL_WND_ADJUST_MIN   0
-#define CFG_CTRL_WND_ADJUST_MAX  20
+//mK / Period
+#define CFG_CTRL_INT_SPEED_MIN   1
+#define CFG_CTRL_INT_SPEED_MAX 100
+
+// K
+#define CFG_CTRL_INT_LIMIT_MIN   1
+#define CFG_CTRL_INT_LIMIT_MAX  10
 
 // 1/10 uV
 #define CFG_TC_UV_PER_DEG_MIN  85
@@ -170,7 +175,8 @@ typedef struct
 	uint16_t controller_max_pwm;
 	uint16_t controller_period;
 	uint16_t controller_window;
-	uint16_t controller_window_adjust;
+	uint16_t controller_int_limit;  // K offset
+	uint16_t controller_int_speed;  // mK / period
 	uint16_t tc_v_per_deg;
 	uint16_t tc_offset;
 } config_t;
@@ -181,15 +187,16 @@ const config_t default_config =
 {
 	.limit_max = 420,
 	.limit_min = 100,
-	.standby_temp = 200,
+	.standby_temp = 150,
 	.standby_delay = 0,
 	.standby_time = 1,
 	.idle_detect_threshold = 10,
-	.controller_max_pwm = 100,
+	.controller_max_pwm = 70,
 	.controller_period = 10,
 	.controller_window = 10,
-	.controller_window_adjust = 3,
-	.tc_v_per_deg = 95,
+	.controller_int_limit = 8,
+	.controller_int_speed = 10,
+	.tc_v_per_deg = 110,
 	.tc_offset = 30
 };
 
@@ -218,9 +225,17 @@ volatile bool kill_heater = false;
 uint16_t heater_max_period;
 
 uint16_t temp_set;
-uint16_t temp_current = 432;
-uint32_t current_duty_smoothed;
-uint32_t current_duty_lt_avg100;
+uint16_t temp_current;
+uint16_t controller_offset1000 = 0;
+uint32_t current_duty_smoothed = 0;
+uint32_t current_duty_lt_avg100 = 0;
+
+/*
+int adc_tc_max = 0;
+int adc_tc_min = 0;
+int adc_v33_max = 0;
+int adc_v33_min = 0;
+*/
 
 struct
 {
@@ -292,10 +307,37 @@ void dma1_channel1_isr()
 		kill_heater = true;
 	}
 
-	// update current temp
-	uint32_t vtc_uv = (((3300000ULL / 501) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
-	uint32_t tc16 = (160 * vtc_uv) / config.tc_v_per_deg + config.tc_offset * 16;
-	temp_current = tc16 / 16;
+	/*
+	if (adc_values[ADC_VALUE_TC] > adc_tc_max)
+	{
+		adc_tc_max = adc_values[ADC_VALUE_TC];
+	}
+	if (adc_values[ADC_VALUE_TC] < adc_tc_min)
+	{
+		adc_tc_min = adc_values[ADC_VALUE_TC];
+	}
+	if (adc_values[ADC_VALUE_VREF] > adc_v33_max)
+	{
+		adc_v33_max = adc_values[ADC_VALUE_VREF];
+	}
+	if (adc_values[ADC_VALUE_VREF] < adc_v33_min)
+	{
+		adc_v33_min = adc_values[ADC_VALUE_VREF];
+	}
+
+	adc_tc_max--;
+	adc_tc_min++;
+	adc_v33_max--;
+	adc_v33_min++;
+	*/
+
+	// thermocouple voltahe in 0.1uV
+	uint32_t vtc_uv10 = (((33000000ULL / 501) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
+
+	// temperature in mK
+	// Of course, our resolution isn't that high, but it makes our controller more stable if we use more precise values.
+	uint32_t tc1000 = (1000 * vtc_uv10) / config.tc_v_per_deg + config.tc_offset * 1000;
+	temp_current = tc1000 / 1000;
 
 	uint16_t ts = temp_set;
 
@@ -308,20 +350,50 @@ void dma1_channel1_isr()
 		ts = config.standby_temp;
 	}
 
-	int err16 = (int)(ts * 16) - (int)tc16;
-	err16 += config.controller_window_adjust * 16;
+
+	int err1000 = (int)(ts * 1000) - (int)tc1000;
+
+	int int_adjust1000;
+	if (err1000 > 0 && err1000 > config.controller_int_speed)
+	{
+		int_adjust1000 = config.controller_int_speed;
+	}
+	else if (err1000 < 0 && -err1000 > config.controller_int_speed)
+	{
+		int_adjust1000 = -(int)config.controller_int_speed;
+	}
+	else
+	{
+		int_adjust1000 = err1000;
+	}
+
+	if (int_adjust1000 > 0 && controller_offset1000 + int_adjust1000 > config.controller_int_limit * 1000)
+	{
+		controller_offset1000 = config.controller_int_limit * 1000;
+	}
+	else if (int_adjust1000 < 0 && controller_offset1000 < -int_adjust1000)
+	{
+		controller_offset1000 = 0;
+	}
+	else
+	{
+		controller_offset1000 += int_adjust1000;
+	}
+
+	err1000 += controller_offset1000;
+	//printf("tc=%u, ts=%u, e=%i co=%u, ia=%i\n", tc1000/1000, temp_set, err1000, controller_offset1000, int_adjust1000);
 
 
 	uint16_t new_period = 0;
-	if (err16 > config.controller_window * 16)
+	if (err1000 > config.controller_window * 1000)
 	{
 		// max power
 		new_period = heater_max_period;
 	}
-	else if (err16 > 0)
+	else if (err1000 > 0)
 	{
 		// (err / wnd) * max_period
-		new_period = (err16 * heater_max_period) / (config.controller_window * 16);
+		new_period = (err1000 * heater_max_period) / (config.controller_window * 1000);
 	}
 
 	timer_set_oc_value(HEATER_TIMER, HEATER_TIMER_OC, new_period);
@@ -429,7 +501,7 @@ static void adc_setup(void)
 	// Then, a DMA_CPLT interrupt is generated after the full conversion is complete
 	// To re-arm the ADC, we only need to set the start bit again.
 	adc_calibrate(ADC1);
-	adc_set_sample_time_on_all_channels(ADC1, ADC_SMPTIME_055DOT5);
+	adc_set_sample_time_on_all_channels(ADC1, ADC_SMPTIME_071DOT5);
 	adc_enable_vrefint();
 	uint8_t ADC_SEQUENCE[] = {ADC_CHANNEL_VREF, 1, 0};
 	adc_set_regular_sequence(ADC1, sizeof(ADC_SEQUENCE) / sizeof(ADC_SEQUENCE[0]), ADC_SEQUENCE);
@@ -798,8 +870,8 @@ static void show_config_screen(const config_menu_entry_t *entry)
 
 static void show_config_menu(const config_menu_entry_t *entries, uint8_t num_of_entries)
 {
-	const char *menu_entries[5];
-	char text_buffer[4][19];
+	const char *menu_entries[6];
+	char text_buffer[5][19];
 	if (num_of_entries >= sizeof(menu_entries) / sizeof(menu_entries[0]))
 	{
 		return;
@@ -893,6 +965,7 @@ static void screen_home(void)
 
 
 		printf("c=%lu, lt=%lu, idle=%lu\r\n", current_duty_smoothed, current_duty_lt_avg100, tickcounter - stby_state.idle_detect_timer);
+		//printf("t_min=%i, tmax=%i, v33min=%i, v33max=%i\r\n", adc_tc_min, adc_tc_max, adc_v33_min, adc_v33_max);
 
 
 		// update every 100 ms
@@ -1009,7 +1082,8 @@ static void screen_config_ctrl_param(void)
 			{.val_ptr = &config.controller_max_pwm, .bound_min = CFG_CTRL_MAX_PWM_MIN, .bound_max = CFG_CTRL_MAX_PWM_MAX, .entry_text_fmt = "Max PWM duty %4u%%", .detail_text = "Max duty cycle", .detail_value_fmt = "%u %%"},
 			{.val_ptr = &config.controller_period, .bound_min = CFG_CTRL_PWM_PERIOD_MIN, .bound_max = CFG_CTRL_PWM_PERIOD_MAX, .entry_text_fmt = "PWM period %5ums", .detail_text = "PWM period", .detail_value_fmt = "%ums"},
 			{.val_ptr = &config.controller_window, .bound_min = CFG_CTRL_WND_SIZE_MIN, .bound_max = CFG_CTRL_WND_SIZE_MAX, .entry_text_fmt = "Reg wnd size %4uC", .detail_text = "Reg window size", .detail_value_fmt = "%u C"},
-			{.val_ptr = &config.controller_window_adjust, .bound_min = CFG_CTRL_WND_ADJUST_MIN, .bound_max = CFG_CTRL_WND_ADJUST_MAX, .entry_text_fmt = "Reg offset %6uC", .detail_text = "Reg offset", .detail_value_fmt = "%u C"}
+			{.val_ptr = &config.controller_int_limit, .bound_min = CFG_CTRL_INT_LIMIT_MIN, .bound_max = CFG_CTRL_INT_LIMIT_MAX, .entry_text_fmt = "Int. ofs limit %2uC", .detail_text = "Integral limit", .detail_value_fmt = "%u C"},
+			{.val_ptr = &config.controller_int_speed, .bound_min = CFG_CTRL_INT_SPEED_MIN, .bound_max = CFG_CTRL_INT_SPEED_MAX, .entry_text_fmt = "Int. speed %3umK/p", .detail_text = "Integral speed", .detail_value_fmt = "%u mK/p"}
 		};
 
 	show_config_menu(entries, sizeof(entries) / sizeof(entries[0]));
