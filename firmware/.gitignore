@@ -1,4 +1,5 @@
 build
 build.elf
+build.map
 build.bin
 .ycm_extra_conf.py
