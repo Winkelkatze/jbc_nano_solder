@@ -399,7 +399,7 @@ void dma1_channel1_isr()
 
 	timer_set_oc_value(HEATER_TIMER, HEATER_TIMER_OC, new_period);
 
-	current_duty_smoothed = ((current_duty_smoothed * 31) + new_period) >> 5;
+	current_duty_smoothed = ((current_duty_smoothed * 63) + new_period) >> 6;
 	current_duty_lt_avg100 = ((current_duty_lt_avg100 * 1023) + (new_period * 100)) >> 10;
 
 	//printf("s=%u c=%u err=%i period=%u period_max=%u\r\n", temp_set, temp_current, err, new_period, heater_max_period);
