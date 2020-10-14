@@ -55,14 +55,14 @@ holder_tower_hole = 1;
 holder_screw_offset = 2;
 holder_screw_head = 2.8;
 
-holder_arm_height = 6;
+holder_arm_height = 8;
 holder_arm_length = 30;
 holder_arm_tower_overlap_r = 2;
-holder_arm_tower_overlap_h = 4;
-holder_arm_circle = 14;
-holder_arm_circle_inner = 10;
-holder_arm_hole = 8;
-holder_arm_wire = 0.5;
+holder_arm_tower_overlap_h = 6;
+holder_arm_circle = 8;
+holder_arm_circle_inner = 5.5;
+holder_arm_hole = 4;
+holder_arm_wire = 0.8;
 
 
 outer_a = [
@@ -346,9 +346,9 @@ module holder_arm_neg()
             }
         }
     }
-    translate([holder_arm_length, 0, holder_arm_height / 2])
+    translate([holder_arm_length, 0, 0])
     {
-        cylinder(h=holder_arm_height / 2, r=holder_arm_circle_inner);
+        cylinder(h=holder_arm_height, r=holder_arm_circle_inner);
     }
     
     translate([0, 0, holder_arm_tower_overlap_h])
@@ -369,8 +369,8 @@ module holder_arm()
     }
 }
 
-front_plate();
-
+//front_plate();
+/*
 translate([58, 30, 0])
 rotate([180, 0, 90])
 {
@@ -378,6 +378,8 @@ rotate([180, 0, 90])
     translate([holder_base_size / 2, holder_base_size / 2, holder_tower_height + holder_base_height - holder_arm_tower_overlap_h])
     holder_arm();
 }
-
+*/
 //translate([0, 0, 40])
 //    bottom_plate();
+
+holder_arm();
