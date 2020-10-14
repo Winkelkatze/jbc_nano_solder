@@ -242,6 +242,7 @@ struct
 	uint32_t idle_detect_timer;
 	uint32_t timer;
 
+	bool manual_off;
 	bool off;
 	bool stby;
 	bool idle_sw;
@@ -580,13 +581,19 @@ static void reset_stby_state(void)
 	stby_state.timer = tickcounter;
 	stby_state.idle_detect_timer = tickcounter;
 	stby_state.idle_sw = idle_sw.stable_state;
-	stby_state.off = false;
+	stby_state.off = stby_state.manual_off;
 	stby_state.stby = false;
 }
 
 
 static void update_stby_state(void)
 {
+	if (stby_state.manual_off)
+	{
+		stby_state.off = true;
+		return;
+	}
+
 	if (!stby_state.off && config.idle_detect_threshold != 0)
 	{
 		// idle if long-term avg < current * (1 - threshold)
@@ -986,15 +993,11 @@ static void screen_home(void)
 		{
 			sw_dn = 0;
 			// Short press -> On/Off
-			if (stby_state.off || stby_state.stby)
-			{
-				// off -> reset
-				reset_stby_state();
-			}
-			else
-			{
-				stby_state.off = true;
-			}
+
+			// We set the manual off state here to the inverse of the off state.
+			// Otherwise (using the manual_state) pressing the switch while OFF from idle will turn the iron OFF first.
+			stby_state.manual_off = !stby_state.off;
+			reset_stby_state();
 		}
 
 		uint16_t old_temp = temp_set;
@@ -1225,6 +1228,8 @@ int main(void)
 		temp_set = config.limit_max;
 	}
 
+	// Don't turn on automatically as soon as there is power.
+	stby_state.manual_off = true;
     reset_stby_state();
 
 	iwdg_reset();
