@@ -107,7 +107,7 @@ extern uint32_t tickcounter;
 static bool menu_timeout;
 
 
-static void menu_wait()
+static void menu_wait(void)
 {
 	uint32_t timeout = tickcounter;
 	bool old_esw = input_encoder_switch();
