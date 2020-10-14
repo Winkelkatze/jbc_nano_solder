@@ -190,7 +190,7 @@ void ssd1306_Init(void) {
 
     // Wait for the screen to boot
     //HAL_Delay(100);
-    for(volatile uint32_t i = 0; i < 100000; i++);
+    for(volatile uint32_t i = 0; i < 100000; i++) {};
 
 	for (uint32_t i = 0; i < sizeof(InitSequence) / sizeof(InitSequence[0]); ++i)
 	{
@@ -707,6 +707,6 @@ void ssd1306_SetDisplayOn(const uint8_t on) {
     ssd1306_WriteCommand(value);
 }
 
-uint8_t ssd1306_GetDisplayOn() {
+uint8_t ssd1306_GetDisplayOn(void) {
     return SSD1306.DisplayOn;
 }

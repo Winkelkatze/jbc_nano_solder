@@ -172,7 +172,7 @@ void ssd1306_SetDisplayOn(const uint8_t on);
  * @return  0: OFF.
  *          1: ON.
  */
-uint8_t ssd1306_GetDisplayOn();
+uint8_t ssd1306_GetDisplayOn(void);
 
 // Low-level procedures
 void ssd1306_Reset(void);
