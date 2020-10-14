@@ -1,4 +1,4 @@
-FILES += main eeprom_i2c font_compressed
+FILES += main eeprom_i2c font_compressed config menu input
 
 vpath %.c source
 

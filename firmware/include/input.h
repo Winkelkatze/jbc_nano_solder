@@ -22,13 +22,34 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
-
 #pragma once
 
-#define EEPROM_SIZE 1024
-#define EEPROM_I2C_ADDR 0x50
-#define EEPROM_I2C_PORT I2C1
+#include <stdbool.h>
+#include <stdint.h>
 
-void eeprom_read(uint16_t ofs, uint8_t *data, uint16_t size);
-void eeprom_write(uint16_t ofs, const uint8_t *data, uint16_t size);
+void input_init(void);
+
+// call once per systick
+void input_update(void);
+
+// encoder ticks != 0
+bool input_encoder_has_ticks(void);
+
+// get current encoder ticks
+int input_encoder_ticks(void);
+
+// get current encoder ticks and reset the counter
+int input_encoder_ticks_reset(void);
+
+// encoder switch pressed?
+bool input_encoder_switch(void);
+// idle detect switch
+bool input_idle_switch(void);
+
+
+// delay 'ticks' or resume immediately if an input event occurred
+void input_delay_or_evt(uint32_t ticks);
+
+// add the current encode value to the given number and clamp within range
+// resets the encoder ticks
+uint32_t input_add_encoder_value_bound(uint32_t val, uint32_t lower_bound, uint32_t upper_bound);

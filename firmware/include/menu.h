@@ -22,13 +22,16 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
-
 #pragma once
 
-#define EEPROM_SIZE 1024
-#define EEPROM_I2C_ADDR 0x50
-#define EEPROM_I2C_PORT I2C1
+// All the config menu things will be handled by the menu directly
+// Only the 'special' screens will be returned as menu result.
+// When the menu is closed, the caller should assume the config has changed
+typedef enum
+{
+	menu_result_home,
+	menu_result_show_raw
+} menu_result_t;
 
-void eeprom_read(uint16_t ofs, uint8_t *data, uint16_t size);
-void eeprom_write(uint16_t ofs, const uint8_t *data, uint16_t size);
+menu_result_t menu_main(void);
+void menu_restore_default_config(void);
