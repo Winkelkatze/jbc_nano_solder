@@ -497,11 +497,13 @@ static void screen_home(void)
 	bool temp_changed = false;
 	while (1)
 	{
+		uint16_t temp_round = ((temp_current + 2) / 5) * 5;
+
 		ssd1306_Fill(Black);
 		ssd1306_SetCursor(0, 3);
-		disp_buf[0] = ' ' + ((temp_current / 100) % 10);
-		disp_buf[1] = ' ' + ((temp_current / 10 ) % 10);
-		disp_buf[2] = ' ' + ((temp_current      ) % 10);
+		disp_buf[0] = ' ' + ((temp_round / 100) % 10);
+		disp_buf[1] = ' ' + ((temp_round / 10 ) % 10);
+		disp_buf[2] = ' ' + ((temp_round      ) % 10);
 		disp_buf[3] = 0;
 
 		ssd1306_WriteStringComp(disp_buf, CompFont_16x26_NUMC, White);
@@ -583,7 +585,7 @@ static void screen_home(void)
 		}
 
 		uint16_t old_temp = temp_set;
-		temp_set = input_add_encoder_value_bound(temp_set, config.limit_min, config.limit_max);
+		temp_set = input_add_encoder_value_bound_step((temp_set * 5) / 5, config.limit_min, config.limit_max, 5);
 
 		if (temp_set != old_temp)
 		{

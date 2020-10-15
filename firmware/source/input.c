@@ -155,7 +155,12 @@ void input_delay_or_evt(uint32_t ticks)
 
 uint32_t input_add_encoder_value_bound(uint32_t val, uint32_t lower_bound, uint32_t upper_bound)
 {
-	int t = input_encoder_ticks_reset();
+	return input_add_encoder_value_bound_step(val, lower_bound, upper_bound, 1);
+}
+
+uint32_t input_add_encoder_value_bound_step(uint32_t val, uint32_t lower_bound, uint32_t upper_bound, uint32_t step)
+{
+	int t = input_encoder_ticks_reset() * step;
 
 	if (t > 0 && val + t > upper_bound)
 	{
