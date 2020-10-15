@@ -57,10 +57,18 @@
 
 #define TEMP_SAVE_INTERVAL 1000
 
-
 // panic cutoff disables the heater until the mcu is reset
 // this is at a relative temp of 430K assuming 12 uV/K and a VCC of 3.3V
 #define PANIC_CUTOFF_ADC_VALUE ((430ULL * 12 * 501 * 4096) / 3300000) // ~430 C @ 3.3V
+
+// Panic, if the temperature difference is below this for a given amount of time while the heater is on
+// This should prevent overheating, if the tip is connected in the wrong polarity
+#define PANIC_MINIMUM_TEMP_DIFF 20
+#define PANIC_MINIMUM_TEMP_DIFF_TIMEOUT 1000
+
+// If the measured supply voltage is not within this range, we set the error state
+#define PANIC_MIN_SUPPLY_VOLTAGE  6000
+#define PANIC_MAX_SUPPLY_VOLTAGE 15000
 
 static void update_stby_state(void);
 
@@ -78,24 +86,25 @@ volatile uint32_t tickcounter = 0;
 #define ADC_VALUE_VREF 0
 #define ADC_VALUE_VDC  1
 #define ADC_VALUE_TC   2
-volatile uint16_t adc_values[3];
+static volatile uint16_t adc_values[3];
 
 // This is the panic shutdown
 // Value is set to true, if the temperature exceeds the panic threshold
 // It's never cleared, so device needs to be restart.
-volatile bool kill_heater = false;
-
+static volatile bool kill_heater = false;
+static const char *err_reason = NULL;
 
 // derived from period and max_pwm
-uint16_t heater_max_period;
+static uint16_t heater_max_period;
 
-uint16_t temp_set;
-uint16_t temp_current;
-uint16_t controller_offset1000 = 0;
-uint32_t current_duty_smoothed = 0;
-uint32_t current_duty_lt_avg100 = 0;
+static uint16_t temp_set;
+static uint16_t temp_current;
+static uint16_t controller_offset1000 = 0;
+static uint32_t current_duty_smoothed = 0;
+static uint32_t current_duty_lt_avg100 = 0;
+static uint32_t temp_diff_panic_timer = 0;
 
-struct
+static struct
 {
 	uint32_t idle_detect_timer;
 	uint32_t timer;
@@ -125,15 +134,8 @@ void dma1_channel1_isr(void)
 	if (adc_values[ADC_VALUE_TC] > PANIC_CUTOFF_ADC_VALUE)
 	{
 		kill_heater = true;
+		err_reason = "T HIGH";
 	}
-
-	// thermocouple voltahe in 0.1uV
-	uint32_t vtc_uv10 = (((33000000ULL / 501) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
-
-	// temperature in mK
-	// Of course, our resolution isn't that high, but it makes our controller more stable if we use more precise values.
-	uint32_t tc1000 = (1000 * vtc_uv10) / config.tc_v_per_deg + config.tc_offset * 1000;
-	temp_current = tc1000 / 1000;
 
 	uint16_t ts = temp_set;
 
@@ -146,6 +148,40 @@ void dma1_channel1_isr(void)
 		ts = config.standby_temp;
 	}
 
+	// thermocouple voltahe in 0.1uV
+	uint32_t vtc_uv10 = (((33000000ULL / 501) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
+
+	// temperature in mK
+	// Of course, our resolution isn't that high, but it makes our controller more stable if we use more precise values.
+	uint32_t tc1000 = (1000 * vtc_uv10) / config.tc_v_per_deg;
+
+	if (!kill_heater)
+	{
+		if (ts == 0 || tc1000 > PANIC_MINIMUM_TEMP_DIFF * 1000)
+		{
+			temp_diff_panic_timer = tickcounter;
+		}
+		else if ((tickcounter - temp_diff_panic_timer) > PANIC_MINIMUM_TEMP_DIFF_TIMEOUT)
+		{
+			kill_heater = true;
+			err_reason = "T LOW";
+		}
+
+		uint32_t vdc = ((3300ULL * 11 * ST_VREFINT_CAL) * adc_values[ADC_VALUE_VDC]) / adc_values[ADC_VALUE_VREF] / 4096;
+		if (vdc < PANIC_MIN_SUPPLY_VOLTAGE)
+		{
+			kill_heater = true;
+			err_reason = "V LOW";
+		}
+		if (vdc > PANIC_MAX_SUPPLY_VOLTAGE)
+		{
+			kill_heater = true;
+			err_reason = "V HIGH";
+		}
+	}
+
+	tc1000 += config.tc_offset * 1000;
+	temp_current = tc1000 / 1000;
 
 	int err1000 = (int)(ts * 1000) - (int)tc1000;
 
@@ -482,8 +518,14 @@ static void screen_home(void)
 
 		if (kill_heater)
 		{
-			ssd1306_SetCursor(128 - 5 * 7,22);
-			ssd1306_WriteStringComp("ERROR", CompFont_7x10, Black);
+			ssd1306_SetCursor(128 - 6 * 7,12);
+			ssd1306_WriteStringComp("ERROR ", CompFont_7x10, Black);
+
+			if (err_reason)
+			{
+				ssd1306_SetCursor(128 - 6 * 7,22);
+				ssd1306_WriteStringComp(err_reason, CompFont_7x10, Black);
+			}
 		}
 		else if (stby_state.off)
 		{
@@ -632,6 +674,8 @@ int main(void)
     reset_stby_state();
 
 	iwdg_reset();
+
+	temp_diff_panic_timer = tickcounter;
 
     // initially start the ADC sample sequence by starting the timer
 	timer_enable_counter(HEATER_TIMER);

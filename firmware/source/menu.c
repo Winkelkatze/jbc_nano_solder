@@ -36,7 +36,7 @@
 
 #define MENU_TIMEOUT       10000
 
-#define CFG_LIMIT_MIN 25
+#define CFG_LIMIT_MIN  80
 #define CFG_LIMIT_MAX 450
 
 // 10s of seconds
