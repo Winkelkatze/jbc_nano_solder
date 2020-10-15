@@ -70,8 +70,18 @@
 #define PANIC_MIN_SUPPLY_VOLTAGE  6000
 #define PANIC_MAX_SUPPLY_VOLTAGE 15000
 
-static void update_stby_state(void);
+// Somehow we get some bad measurements (I think its interference from the display, but not sure...)
+// In order to filter those, we add an "outlier detection"
+// This works by calculating the average deviation from the average over the last measurements.
+// If a measurement is more than THRESHOLD percent wrong, we skip controller cycle and use the average last value instead.
+#define OUTLIER_DETECTION_WND 16
+// Threshold should be at least 200, since this is what we expect for a monotonous increase
+#define OUTLIER_DETECTION_THRESHOLD 230
+// Minimum avg error (mK), this prevents generating lots of outliers when the temperature is stable
+#define OUTLIER_DETECTION_MIN_AVG_ERR 2000
 
+static void update_stby_state(void);
+static bool outlier_detection(uint32_t value);
 
 /*
  * Basic mode of operation
@@ -98,11 +108,15 @@ static const char *err_reason = NULL;
 static uint16_t heater_max_period;
 
 static uint16_t temp_set;
-static uint16_t temp_current;
+static uint32_t temp_current1000;
 static uint16_t controller_offset1000 = 0;
 static uint32_t current_duty_smoothed = 0;
 static uint32_t current_duty_lt_avg100 = 0;
 static uint32_t temp_diff_panic_timer = 0;
+static uint32_t outlier_detection_window[OUTLIER_DETECTION_WND] = {};
+static size_t outlier_detection_index = 0;
+static size_t outlier_detection_sum = 0;
+
 
 static struct
 {
@@ -181,51 +195,61 @@ void dma1_channel1_isr(void)
 	}
 
 	tc1000 += config.tc_offset * 1000;
-	temp_current = tc1000 / 1000;
-
-	int err1000 = (int)(ts * 1000) - (int)tc1000;
-
-	int int_adjust1000;
-	if (err1000 > 0 && err1000 > config.controller_int_speed)
-	{
-		int_adjust1000 = config.controller_int_speed;
-	}
-	else if (err1000 < 0 && -err1000 > config.controller_int_speed)
-	{
-		int_adjust1000 = -(int)config.controller_int_speed;
-	}
-	else
-	{
-		int_adjust1000 = err1000;
-	}
-
-	if (int_adjust1000 > 0 && controller_offset1000 + int_adjust1000 > config.controller_int_limit * 1000)
-	{
-		controller_offset1000 = config.controller_int_limit * 1000;
-	}
-	else if (int_adjust1000 < 0 && controller_offset1000 < -int_adjust1000)
-	{
-		controller_offset1000 = 0;
-	}
-	else
-	{
-		controller_offset1000 += int_adjust1000;
-	}
-
-	err1000 += controller_offset1000;
-	//printf("tc=%u, ts=%u, e=%i co=%u, ia=%i\n", tc1000/1000, temp_set, err1000, controller_offset1000, int_adjust1000);
-
 
 	uint16_t new_period = 0;
-	if (err1000 > config.controller_window * 1000)
+
+	// outlier detection
+	if (outlier_detection(tc1000))
 	{
-		// max power
-		new_period = heater_max_period;
+		temp_current1000 = (temp_current1000 * 7 + tc1000) / 8;
+		int err1000 = (int)(ts * 1000) - (int)tc1000;
+
+		int int_adjust1000;
+		if (err1000 > 0 && err1000 > config.controller_int_speed)
+		{
+			int_adjust1000 = config.controller_int_speed;
+		}
+		else if (err1000 < 0 && -err1000 > config.controller_int_speed)
+		{
+			int_adjust1000 = -(int)config.controller_int_speed;
+		}
+		else
+		{
+			int_adjust1000 = err1000;
+		}
+
+		if (int_adjust1000 > 0 && controller_offset1000 + int_adjust1000 > config.controller_int_limit * 1000)
+		{
+			controller_offset1000 = config.controller_int_limit * 1000;
+		}
+		else if (int_adjust1000 < 0 && controller_offset1000 < -int_adjust1000)
+		{
+			controller_offset1000 = 0;
+		}
+		else
+		{
+			controller_offset1000 += int_adjust1000;
+		}
+
+		err1000 += controller_offset1000;
+		//printf("tc=%u, ts=%u, e=%i co=%u, ia=%i\n", tc1000/1000, temp_set, err1000, controller_offset1000, int_adjust1000);
+
+
+		if (err1000 > config.controller_window * 1000)
+		{
+			// max power
+			new_period = heater_max_period;
+		}
+		else if (err1000 > 0)
+		{
+			// (err / wnd) * max_period
+			new_period = (err1000 * heater_max_period) / (config.controller_window * 1000);
+		}
 	}
-	else if (err1000 > 0)
+	else if (!stby_state.off && ts > config.tc_offset)
 	{
-		// (err / wnd) * max_period
-		new_period = (err1000 * heater_max_period) / (config.controller_window * 1000);
+		// detected an outlier, so we just re-use the average
+		new_period = current_duty_smoothed;
 	}
 
 	timer_set_oc_value(HEATER_TIMER, HEATER_TIMER_OC, new_period);
@@ -489,6 +513,49 @@ static void update_config(void)
 }
 
 
+static bool outlier_detection(uint32_t value)
+{
+	// insert new value
+	outlier_detection_sum -= outlier_detection_window[outlier_detection_index];
+	outlier_detection_window[outlier_detection_index] = value;
+	outlier_detection_index = (outlier_detection_index + 1) % OUTLIER_DETECTION_WND;
+	outlier_detection_sum += value;
+
+	uint32_t avg = outlier_detection_sum / OUTLIER_DETECTION_WND;
+
+	uint32_t err_sum = 0;
+	for (size_t i = 0; i < OUTLIER_DETECTION_WND; ++i)
+	{
+		if (outlier_detection_window[i] > avg)
+		{
+			err_sum += outlier_detection_window[i] - avg;
+		}
+		else
+		{
+			err_sum += avg - outlier_detection_window[i];
+		}
+	}
+
+	uint32_t avg_err = err_sum / OUTLIER_DETECTION_WND;
+	if (avg_err < OUTLIER_DETECTION_MIN_AVG_ERR)
+	{
+		avg_err = OUTLIER_DETECTION_MIN_AVG_ERR;
+	}
+
+	uint32_t val_err;
+	if (value > avg)
+	{
+		val_err = value - avg;
+	}
+	else
+	{
+		val_err = avg - value;
+	}
+
+	return val_err * 100 < avg_err * OUTLIER_DETECTION_THRESHOLD;
+}
+
+
 static void screen_home(void)
 {
 	uint32_t sw_dn = 0;
@@ -497,7 +564,8 @@ static void screen_home(void)
 	bool temp_changed = false;
 	while (1)
 	{
-		uint16_t temp_round = ((temp_current + 2) / 5) * 5;
+		uint16_t temp_round = (((temp_current1000 / 1000) + 2) / 5) * 5;
+		//uint16_t temp_round = temp_current1000 / 1000;
 
 		ssd1306_Fill(Black);
 		ssd1306_SetCursor(0, 3);
