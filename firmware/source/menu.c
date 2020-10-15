@@ -71,8 +71,8 @@
 #define CFG_CTRL_INT_LIMIT_MAX  10
 
 // 1/10 uV
-#define CFG_TC_UV_PER_DEG_MIN  85
-#define CFG_TC_UV_PER_DEG_MAX 150
+#define CFG_TC_UV_PER_DEG_MIN  75
+#define CFG_TC_UV_PER_DEG_MAX 110
 
 // Deg C
 #define CFG_TC_COLDJUNCTION_MIN  0

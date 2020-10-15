@@ -45,7 +45,7 @@ const config_t default_config =
 	.controller_window = 10,
 	.controller_int_limit = 3,
 	.controller_int_speed = 10,
-	.tc_v_per_deg = 110,
+	.tc_v_per_deg = 90,
 	.tc_offset = 30
 };
 

@@ -58,8 +58,8 @@
 #define TEMP_SAVE_INTERVAL 1000
 
 // panic cutoff disables the heater until the mcu is reset
-// this is at a relative temp of 430K assuming 12 uV/K and a VCC of 3.3V
-#define PANIC_CUTOFF_ADC_VALUE ((430ULL * 12 * 501 * 4096) / 3300000) // ~430 C @ 3.3V
+// this is at a relative temp of 440K assuming 9 uV/K and a VCC of 3.3V
+#define PANIC_CUTOFF_ADC_VALUE ((440ULL * 9 * 501 * 4096) / 3300000) // ~430 C @ 3.3V
 
 // Panic, if the temperature difference is below this for a given amount of time while the heater is on
 // This should prevent overheating, if the tip is connected in the wrong polarity
