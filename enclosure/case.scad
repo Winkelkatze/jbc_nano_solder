@@ -48,21 +48,22 @@ bottom_overlap_width = 3;
 holder_mount_distance = stand_nuts[1] - stand_nuts[0];
 holder_base_size = 20;
 holder_base_height = 10;
-holder_base_wire = 0.3;
-holder_tower_r = 3.5;
-holder_tower_height = 70;
-holder_tower_hole = 1;
+holder_base_wire = 0.4;
+holder_tower_r = 4;
+holder_tower_height = 85;
+holder_tower_hole = 1.5;
 holder_screw_offset = 2;
 holder_screw_head = 2.8;
 
-holder_arm_height = 8;
+holder_arm_height = 9.5;
 holder_arm_length = 30;
 holder_arm_tower_overlap_r = 2;
 holder_arm_tower_overlap_h = 6;
 holder_arm_circle = 8;
-holder_arm_circle_inner = 5.5;
+holder_arm_circle_inner_t = 5.7;
 holder_arm_hole = 4;
 holder_arm_wire = 0.8;
+holder_arm_wire_hor = 0.5;
 
 
 outer_a = [
@@ -348,7 +349,21 @@ module holder_arm_neg()
     }
     translate([holder_arm_length, 0, 0])
     {
-        cylinder(h=holder_arm_height, r=holder_arm_circle_inner);
+        cylinder(h=holder_arm_height, r1=holder_arm_hole, r2=holder_arm_circle_inner_t);
+    }
+    
+    diff = holder_arm_circle_inner_t - holder_arm_hole;
+    ang = -atan2(diff, holder_arm_height);
+    rel_h = 1 - holder_arm_tower_overlap_h / holder_arm_height;
+    
+    
+    translate([holder_arm_length - holder_arm_circle_inner_t + diff * rel_h, 0, holder_arm_tower_overlap_h])
+    {
+        rotate([0, ang, 0])
+        {
+            cylinder(h=holder_arm_height, r=holder_arm_wire_hor);
+        }
+        
     }
     
     translate([0, 0, holder_arm_tower_overlap_h])
@@ -382,4 +397,5 @@ rotate([180, 0, 90])
 //translate([0, 0, 40])
 //    bottom_plate();
 
+//holder();
 holder_arm();
