@@ -1,0 +1,9 @@
+[submodule "libopencm3"]
+	path = firmware/libopencm3
+	url = https://github.com/libopencm3/libopencm3.git
+	branch = 52dc1ff6d77b49c5cf01fd90a46b86eaaa873a4f
+[submodule "tinyprintf"]
+	path = firmware/tinyprintf
+	url = https://github.com/cjlano/tinyprintf.git
+	branch = 2ee30120ec15e321566b43f83c731d060bb437f5
+
