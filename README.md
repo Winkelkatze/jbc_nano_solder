@@ -21,3 +21,28 @@ Despite the cable having three wires and the tip having three contacts, two of t
 Everything works pretty well, the heat-up times are JBC-like fast and the temperature is quite stable. I don't know the exact characteristics of the thermocouple, but from tests, I assume the sensitivity is about 9uV/K. It doesn't matter that much, since the temperature you need for a job depends highly on the tip and the job anyway anyway. The hardware supports to measure the supply voltage, but I'm not using it right now.
 ### Under-voltage self destruct
 One issue with the current hardware is a potential self-destruct scenario, if the supply voltage is too low. Since I'm using a low-side driver to drive a high-side P-Channel FET, the undervoltage lockout (about 4V) of the driver will force the FET ON when the supply voltage is too low. This may cause the tip or the mosfet to overheat. So, be careful with the choice of power supply.
+
+## Building the firmware
+To build the firmware, you will need the ARM toolchain on your machine. I have only tested the build on linux, so not sure how this would work on other OSes.
+### Clone repo and submodules
+```
+git clone https://github.com/Winkelkatze/jbc_nano_solder.git
+cd jbc_nano_solder
+git submodule init
+git submodule update
+```
+### Build libopencmd
+```
+cd firmware/libopencm3
+make
+```
+### Build the firmware
+```
+cd firmware
+make
+```
+### Flashing the firmware
+You can either use your preferred tool to flash the .elf manually or, if you have openocd installed and the controller connected with a STLINK, the firmware can be flashed with
+```
+make flash
+```
