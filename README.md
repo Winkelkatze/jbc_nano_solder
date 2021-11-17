@@ -1,6 +1,8 @@
 # JBC Nano Solder
 DIY controller for JBC Nano (NT115) hand piece and C115 tips.
 
+This project can be found on Hackaday: https://hackaday.io/project/175580-diy-jbc-nano-controller
+
 JBC makes awesome high-end soldering irons for professional use. The stations are quite expensive (especially the Nano system), however the tips and hand pieces are reasonably priced for hobby users. Therefore building controllers for these became kind of a sport among DIYers.
 
 ## Why Nano and not T245/T210 as everyone else?
