@@ -23,7 +23,7 @@ Everything works pretty well, the heat-up times are JBC-like fast and the temper
 One issue with the current hardware is a potential self-destruct scenario, if the supply voltage is too low. Since I'm using a low-side driver to drive a high-side P-Channel FET, the undervoltage lockout (about 4V) of the driver will force the FET ON when the supply voltage is too low. This may cause the tip or the mosfet to overheat. So, be careful with the choice of power supply.
 
 ## Building the firmware
-To build the firmware, you will need the ARM toolchain on your machine. I have only tested the build on linux, so not sure how this would work on other OSes.
+To build the firmware, you will need the ARM toolchain on your machine. I have only tested the build on Linux, so not sure how this would work on other OSes.
 ### Clone repo and submodules
 ```
 git clone https://github.com/Winkelkatze/jbc_nano_solder.git
@@ -31,7 +31,7 @@ cd jbc_nano_solder
 git submodule init
 git submodule update
 ```
-### Build libopencmd
+### Build libopencm3
 ```
 cd firmware/libopencm3
 make
