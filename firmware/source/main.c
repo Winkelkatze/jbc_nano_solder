@@ -724,10 +724,20 @@ int main(void)
 	printf("==============================================================\r\n");
 
 	iwdg_reset();
-
-    ssd1306_Init();
+	ssd1306_Init();
 
 	input_init();
+
+	// Don't turn on automatically as soon as there is power.
+	stby_state.manual_off = true;
+	reset_stby_state();
+
+	iwdg_reset();
+
+	temp_diff_panic_timer = tickcounter;
+
+	// initially start the ADC sample sequence by starting the timer
+	timer_enable_counter(HEATER_TIMER);
 
 	// load config
 	if (!config_load())
@@ -738,17 +748,6 @@ int main(void)
 	temp_set = config_load_last_temperature();
 
 	update_config();
-
-	// Don't turn on automatically as soon as there is power.
-	stby_state.manual_off = true;
-    reset_stby_state();
-
-	iwdg_reset();
-
-	temp_diff_panic_timer = tickcounter;
-
-    // initially start the ADC sample sequence by starting the timer
-	timer_enable_counter(HEATER_TIMER);
 
 
 	menu_result_t sel = menu_result_home;
