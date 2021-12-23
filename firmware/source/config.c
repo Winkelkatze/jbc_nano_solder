@@ -122,6 +122,7 @@ void config_save(void)
 		printf("write new checksum: 0x%04x\r\n", cs);
 		eeprom_write(EEPROM_POS_CONFIG_CS, (uint8_t*)&cs, sizeof(cs));
 	}
+	printf("Config save done\r\n");
 }
 
 

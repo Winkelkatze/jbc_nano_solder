@@ -420,6 +420,9 @@ void menu_restore_default_config(void)
 	ssd1306_WriteStringComp("OK", CompFont_11x18, Black);
 	ssd1306_UpdateScreen();
 
-	while(input_encoder_switch());
+	printf("Waiting for user confirmation: ");
 	while(!input_encoder_switch());
+	printf(" PRESS");
+	while(input_encoder_switch());
+	printf(" RELEASE\r\n");
 }

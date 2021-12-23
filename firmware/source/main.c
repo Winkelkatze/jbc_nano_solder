@@ -754,6 +754,7 @@ int main(void)
 
 	while (1)
 	{
+		printf("Show main screen %i\r\n", sel);
 		switch (sel)
 		{
 			case menu_result_show_raw:
