@@ -28,6 +28,8 @@
 #include <string.h>
 #include <libopencm3/stm32/i2c.h>
 
+#define EEPROM_PAGE_SIZE 8
+
 void eeprom_read(uint16_t ofs, uint8_t *data, uint16_t size)
 {
 	if (ofs + size > EEPROM_SIZE || ofs + size < ofs)
@@ -63,7 +65,7 @@ void eeprom_read(uint16_t ofs, uint8_t *data, uint16_t size)
 
 void eeprom_write(uint16_t ofs, const uint8_t *data, uint16_t size)
 {
-	uint8_t pagebuf[17];
+	uint8_t pagebuf[EEPROM_PAGE_SIZE + 1];
 
 	if (ofs + size > EEPROM_SIZE || ofs + size < ofs)
 	{
@@ -75,11 +77,13 @@ void eeprom_write(uint16_t ofs, const uint8_t *data, uint16_t size)
 		uint8_t ofs_in_page = ofs & 0xff;
 		uint8_t page = ofs >> 8;
 
-		uint8_t cur = size > 16 ? 16 : size;
+		uint8_t cur = size > EEPROM_PAGE_SIZE ? EEPROM_PAGE_SIZE : size;
 
-		if (((uint16_t)ofs_in_page) + cur > 0xff)
+		// Ensure aligned
+		uint16_t line_end = ((ofs / EEPROM_PAGE_SIZE) + 1) * EEPROM_PAGE_SIZE;
+		if (ofs_in_page + cur > line_end)
 		{
-			cur = 0x100 - ofs_in_page;
+			cur = line_end - ofs_in_page;
 		}
 
 		//printf("eep write: addr p=%u ofs=%u cur=%u\r\n", page, ofs_in_page, cur);

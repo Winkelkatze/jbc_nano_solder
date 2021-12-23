@@ -26,7 +26,7 @@
 
 #pragma once
 
-#define EEPROM_SIZE 1024
+#define EEPROM_SIZE 128
 #define EEPROM_I2C_ADDR 0x50
 #define EEPROM_I2C_PORT I2C1
 
