@@ -1,3 +1,4 @@
 (sym_lib_table
-  (lib (name custom_parts)(type Legacy)(uri ${KIPRJMOD}/custom_parts.lib)(options "")(descr ""))
+  (lib (name "custom_parts")(type "Legacy")(uri "${KIPRJMOD}/custom_parts.lib")(options "")(descr ""))
+  (lib (name "JBC_Nano_Hardware-rescue")(type "Legacy")(uri "${KIPRJMOD}/JBC_Nano_Hardware-rescue.lib")(options "")(descr ""))
 )
