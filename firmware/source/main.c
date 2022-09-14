@@ -55,11 +55,14 @@
 #define ADC_TRIGGER (3 << ADC_CFGR1_EXTSEL_SHIFT) // Timer3
 
 
+// Gain of the thermocouple amplifier
+#define THERMOCOUPLE_GAIN 501
+
 #define TEMP_SAVE_INTERVAL 1000
 
 // panic cutoff disables the heater until the mcu is reset
 // this is at a relative temp of 440K assuming 9 uV/K and a VCC of 3.3V
-#define PANIC_CUTOFF_ADC_VALUE ((440ULL * 9 * 501 * 4096) / 3300000) // ~430 C @ 3.3V
+#define PANIC_CUTOFF_ADC_VALUE ((440ULL * 9 * (THERMOCOUPLE_GAIN) * 4096) / 3300000) // ~430 C @ 3.3V
 
 // Panic, if the temperature difference is below this for a given amount of time while the heater is on
 // This should prevent overheating, if the tip is connected in the wrong polarity
@@ -163,7 +166,7 @@ void dma1_channel1_isr(void)
 	}
 
 	// thermocouple voltahe in 0.1uV
-	uint32_t vtc_uv10 = (((33000000ULL / 501) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
+	uint32_t vtc_uv10 = (((33000000ULL / (THERMOCOUPLE_GAIN)) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
 
 	// temperature in mK
 	// Of course, our resolution isn't that high, but it makes our controller more stable if we use more precise values.
@@ -677,7 +680,7 @@ static void screen_raw(void)
 	{
 		uint32_t v33 = (3300 * ST_VREFINT_CAL) / adc_values[ADC_VALUE_VREF];
 		uint32_t vdc = ((3300ULL * 11 * ST_VREFINT_CAL) * adc_values[ADC_VALUE_VDC]) / adc_values[ADC_VALUE_VREF] / 4096;
-		uint32_t vtc = (((3300000ULL / 501) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
+		uint32_t vtc = (((3300000ULL / (THERMOCOUPLE_GAIN)) * ST_VREFINT_CAL) * adc_values[ADC_VALUE_TC]) / adc_values[ADC_VALUE_VREF] / 4096;
 		printf("v33=%lumV vdc=%lumV tc=%luuV ~temp=%luC\r\n", v33, vdc, vtc, vtc/8 + 25);
 
 		char buff[32];
