@@ -5,6 +5,11 @@ This project can be found on Hackaday: https://hackaday.io/project/175580-diy-jb
 
 JBC makes awesome high-end soldering irons for professional use. The stations are quite expensive (especially the Nano system), however the tips and hand pieces are reasonably priced for hobby users. Therefore building controllers for these became kind of a sport among DIYers.
 
+## State of the project
+This project is in a working state, but is not actively worked on and there are a few unsolved issues, that can lead to the tip overheating if things go wrong. The issues stem from using a low-side gate driver to drive a P-channel FET on the high side. This causes the default state to be **ON**, which in turn means, the heater is powered when there is no signal telling it otherwise. This happens, if the CPU is in RESET or has no power.
+Make sure to always disconnect the iron when flashing the firmware, debugging or making changes to the hardware.
+**As a mitigation, consider adding a pull-up resistor to the gate driver input.**
+
 ## Why Nano and not T245/T210 as everyone else?
 The JBC NT115 soldering iron is amazing, it's quite compact, has a slim cable and the grip-to-tip distance is really small. It's meant for super fine-pitched SMT parts, yet if you combine it with a larger tip, its powerful enough for most soldering needs. So, despite being a high precision tool, it is still use-able as a general purpose soldering iron.
 
